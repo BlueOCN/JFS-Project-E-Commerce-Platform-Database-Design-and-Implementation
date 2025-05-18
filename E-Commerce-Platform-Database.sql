@@ -260,5 +260,47 @@ ORDER BY avg_rating DESC;
 */
 
 -- Automatically update the order status based on order processing.
+DELIMITER //
+CREATE PROCEDURE UpdateOrderStatus(IN orderID INT)
+BEGIN
+    DECLARE orderStatus ENUM('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Completed');
+    
+    -- Get current status of the order
+    SELECT order_status INTO orderStatus FROM Orders WHERE order_id = orderID;
+    
+    -- Update status based on conditions
+    IF orderStatus = 'Pending' THEN
+        UPDATE Orders SET order_status = 'Processing' WHERE order_id = orderID;
+    ELSEIF orderStatus = 'Processing' THEN
+        UPDATE Orders SET order_status = 'Shipped' WHERE order_id = orderID;
+    ELSEIF orderStatus = 'Shipped' THEN
+        UPDATE Orders SET order_status = 'Delivered' WHERE order_id = orderID;
+    END IF;
+END //
+DELIMITER ;
+
+CREATE TRIGGER UpdateOrderOnPayment
+AFTER UPDATE ON Payments
+FOR EACH ROW
+BEGIN
+    IF NEW.status = 'Completed' THEN
+        CALL UpdateOrderStatus(NEW.order_id);
+    END IF;
+END;
+
 
 -- Generate a report on the most active users.
+SELECT 
+    u.user_id, 
+    u.username, 
+    COUNT(DISTINCT o.order_id) AS total_orders, 
+    COUNT(DISTINCT r.review_id) AS total_reviews, 
+    COUNT(DISTINCT p.payment_id) AS total_payments,
+    (COUNT(DISTINCT o.order_id) + COUNT(DISTINCT r.review_id) + COUNT(DISTINCT p.payment_id)) AS activity_score
+FROM Users u
+LEFT JOIN Orders o ON u.user_id = o.user_id
+LEFT JOIN Reviews r ON u.user_id = r.user_id
+LEFT JOIN Payments p ON o.order_id = p.order_id
+GROUP BY u.user_id, u.username
+ORDER BY activity_score DESC
+LIMIT 3;
