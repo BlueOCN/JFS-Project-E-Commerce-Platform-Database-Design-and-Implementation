@@ -197,12 +197,25 @@ WHERE MONTHNAME(payment_date) = 'may' AND YEAR(payment_date) = 2025;
 */
 
 -- Add a new product to the inventory.
+INSERT INTO Products (product_name, category, price, stock_quantity, created_at) 
+VALUES ('Gaming Laptop', 'Electronics', 1299.99, 20, CURRENT_TIMESTAMP);
+
 
 -- Place a new order for a user.
+INSERT INTO Orders (user_id, total_amount, order_status, order_date) 
+VALUES (2, 1299.99, 'Pending', CURRENT_TIMESTAMP);
+INSERT INTO OrderDetails (order_id, product_id, quantity, unit_price) 
+VALUES (10, 6, 1, 1299.99);
 
 -- Update the stock quantity of a product.
+UPDATE products
+SET stock_quantity = 30, updated_at = CURRENT_TIMESTAMP
+WHERE product_id = 6;
 
 -- Remove a user's review.
+DELETE FROM Reviews
+WHERE user_id = 1 AND review_id = 4
+LIMIT 1;
 
 
 /*
