@@ -158,16 +158,38 @@ SELECT * FROM Reviews;
 */
 
 -- Retrieve the list of all products in a specific category.
+SELECT * FROM products WHERE category = 'Electronics';
 
 -- Retrieve the details of a specific user by providing their user_id.
+SELECT * FROM Users WHERE user_id = 1;
 
 -- Retrieve the order history for a particular user.
+SELECT * FROM Orders WHERE user_id = 1;
 
 -- Retrieve the products in an order along with their quantities and prices.
+SELECT 
+    o.order_id, 
+    p.product_name, 
+    od.quantity, 
+    od.unit_price 
+FROM Orders o
+INNER JOIN OrderDetails od ON o.order_id = od.order_id
+INNER JOIN Products p ON od.product_id = p.product_id
+WHERE o.order_id = 7;
 
 -- Retrieve the average rating of a product.
+SELECT AVG(r.rating) AS average_rating
+FROM Reviews r
+WHERE r.product_id = 2;
 
 -- Retrieve the total revenue for a given month.
+SELECT SUM(amount) AS total_revenue 
+FROM Payments
+WHERE MONTH(payment_date) = 5 AND YEAR(payment_date) = 2025;
+
+SELECT SUM(amount) AS total_revenue 
+FROM Payments
+WHERE MONTHNAME(payment_date) = 'may' AND YEAR(payment_date) = 2025;
 
 
 /*
