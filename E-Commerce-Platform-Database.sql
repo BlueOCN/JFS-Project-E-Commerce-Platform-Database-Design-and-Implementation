@@ -203,9 +203,9 @@ VALUES ('Gaming Laptop', 'Electronics', 1299.99, 20, CURRENT_TIMESTAMP);
 
 -- Place a new order for a user.
 INSERT INTO Orders (user_id, total_amount, order_status, order_date) 
-VALUES (2, 1299.99, 'Pending', CURRENT_TIMESTAMP);
+VALUES (1, 1299.99, 'Pending', CURRENT_TIMESTAMP);
 INSERT INTO OrderDetails (order_id, product_id, quantity, unit_price) 
-VALUES (10, 6, 1, 1299.99);
+VALUES (11, 6, 2, 1299.99);
 
 -- Update the stock quantity of a product.
 UPDATE products
@@ -223,10 +223,36 @@ LIMIT 1;
 */
 
 -- Identify the top-selling products.
+SELECT
+    p.product_id,
+    p.product_name,
+    SUM(od.quantity) AS total_sold
+FROM products p
+INNER JOIN orderdetails od ON p.product_id = od.product_id
+GROUP BY p.product_id, p.product_name
+ORDER BY total_sold DESC
+LIMIT 3;
 
 -- Find users who have placed orders exceeding a certain amount.
+SELECT 
+    o.user_id, 
+    u.username, 
+    SUM(o.total_amount) AS orders_total_amount 
+FROM Orders o
+INNER JOIN Users u ON o.user_id = u.user_id
+GROUP BY o.user_id, u.username
+HAVING orders_total_amount > 1500
+ORDER BY orders_total_amount DESC;
+
 
 -- Calculate the overall average rating for each product category.
+SELECT 
+    p.category, 
+    COALESCE(AVG(r.rating), 0) AS avg_rating 
+FROM Reviews r
+RIGHT JOIN products p ON r.product_id = p.product_id
+GROUP BY p.category
+ORDER BY avg_rating DESC;
 
 
 /*
